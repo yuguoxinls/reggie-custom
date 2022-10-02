@@ -85,7 +85,7 @@
               @click="statusHandle(scope.row)"
               v-if="user === 'admin'"
             >
-              {{ scope.row.status == '1' ? '禁用' : '启用' }}
+              {{ String(scope.row.status) == '1' ? '禁用' : '启用' }}
             </el-button>
           </template>
         </el-table-column>

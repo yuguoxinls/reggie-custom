@@ -1,4 +1,4 @@
-package com.jack.usercenter.common;
+package com.jack.reggiecustom.common;
 
 public class ResultUtils {
     /**
@@ -8,7 +8,7 @@ public class ResultUtils {
      * @param <T>
      */
     public static <T> BaseResponse<T> success(T data){
-        return new BaseResponse<>(0, data, "ok");
+        return new BaseResponse<>(1, data, "ok");
     }
 
     public static BaseResponse error(ErrorCode errorCode){

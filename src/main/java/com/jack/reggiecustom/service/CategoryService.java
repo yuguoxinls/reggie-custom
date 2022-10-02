@@ -1,7 +1,7 @@
-package generator.service;
+package com.jack.reggiecustom.service;
 
-import generator.domain.Category;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jack.reggiecustom.model.domain.Category;
 
 /**
 * @author Administrator

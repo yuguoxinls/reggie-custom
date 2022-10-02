@@ -1,4 +1,4 @@
-package com.jack.reggie.config;
+package com.jack.reggiecustom.config;
 
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;

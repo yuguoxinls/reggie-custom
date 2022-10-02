@@ -1,4 +1,4 @@
-package com.jack.reggie.common;
+package com.jack.reggiecustom.common;
 
 /**
  * 基于ThreadLocal的工具类，用于保存和获取当前用户的id

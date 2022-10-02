@@ -1,4 +1,4 @@
-package com.jack.usercenter.common;
+package com.jack.reggiecustom.common;
 
 public enum ErrorCode {
     SUCCESS(0,"ok",""),
@@ -9,12 +9,12 @@ public enum ErrorCode {
     SYSTEM_ERROR(50000,"系统内部异常","");
 
     private final int code;
-    private final String message;
+    private final String msg;
     private final String description;
 
-    ErrorCode(int code, String message, String description) {
+    ErrorCode(int code, String msg, String description) {
         this.code = code;
-        this.message = message;
+        this.msg = msg;
         this.description = description;
     }
 
@@ -23,7 +23,7 @@ public enum ErrorCode {
     }
 
     public String getMessage() {
-        return message;
+        return msg;
     }
 
     public String getDescription() {

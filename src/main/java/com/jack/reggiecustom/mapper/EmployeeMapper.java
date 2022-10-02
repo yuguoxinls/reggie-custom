@@ -1,7 +1,8 @@
-package generator.mapper;
+package com.jack.reggiecustom.mapper;
 
-import generator.domain.Employee;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jack.reggiecustom.model.domain.Employee;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
 * @author Administrator
@@ -9,6 +10,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2022-09-30 15:51:00
 * @Entity generator.domain.Employee
 */
+@Mapper
 public interface EmployeeMapper extends BaseMapper<Employee> {
 
 }

@@ -1,8 +1,9 @@
-package com.jack.reggie.filter;
+package com.jack.reggiecustom.filter;
 
 import com.alibaba.fastjson.JSON;
-import com.jack.reggie.common.BaseContext;
-import com.jack.reggie.common.R;
+import com.jack.reggiecustom.common.BaseContext;
+import com.jack.reggiecustom.common.ErrorCode;
+import com.jack.reggiecustom.common.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
 
@@ -70,8 +71,7 @@ public class LoginCheckFilter implements Filter {
             return;
         }
         //5、如果未登录则返回登陆结果，通过输出流方式向客户端响应数据
-        response.getWriter().write(JSON.toJSONString(R.error("NOTLOGIN")));
-        return;
+        response.getWriter().write(JSON.toJSONString(ResultUtils.error(ErrorCode.NO_AUTH, "未登录")));
 
     }
 

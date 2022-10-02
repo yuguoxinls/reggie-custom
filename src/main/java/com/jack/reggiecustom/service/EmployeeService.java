@@ -1,7 +1,10 @@
-package generator.service;
+package com.jack.reggiecustom.service;
 
-import generator.domain.Employee;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jack.reggiecustom.common.BaseResponse;
+import com.jack.reggiecustom.model.domain.Employee;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
 * @author Administrator
@@ -10,4 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface EmployeeService extends IService<Employee> {
 
+    public BaseResponse employeeLogin(Employee employee, HttpServletRequest request);
+
+    BaseResponse add(Employee employee, HttpServletRequest request);
 }

@@ -1,7 +1,7 @@
-package generator.mapper;
+package com.jack.reggiecustom.mapper;
 
-import generator.domain.Category;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jack.reggiecustom.model.domain.Category;
 
 /**
 * @author Administrator
