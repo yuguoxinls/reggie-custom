@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
-//@ServletComponentScan
+@ServletComponentScan
 //@EnableTransactionManagement
 //@EnableCaching
 @EnableScheduling

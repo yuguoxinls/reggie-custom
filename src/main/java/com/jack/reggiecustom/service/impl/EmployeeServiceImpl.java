@@ -2,6 +2,7 @@ package com.jack.reggiecustom.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jack.reggiecustom.common.BaseContext;
 import com.jack.reggiecustom.common.ErrorCode;
 import com.jack.reggiecustom.common.ResultUtils;
 import com.jack.reggiecustom.constant.UserConstant;
@@ -70,14 +71,14 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
 
 
         employee.setPassword(initPassword);
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
+        //employee.setCreateTime(LocalDateTime.now());
+        //employee.setUpdateTime(LocalDateTime.now());
 
         //获取当前登录用户的id
-        Long empId = (Long) request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        //Long empId = (Long) request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
 
-        employee.setCreateUser(empId);
-        employee.setUpdateUser(empId);
+        //employee.setCreateUser(empId);
+        //employee.setUpdateUser(empId);
 
         boolean flag = this.save(employee);
 

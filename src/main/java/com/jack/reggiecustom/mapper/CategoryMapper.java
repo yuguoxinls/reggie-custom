@@ -2,6 +2,7 @@ package com.jack.reggiecustom.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jack.reggiecustom.model.domain.Category;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
 * @author Administrator
@@ -9,6 +10,7 @@ import com.jack.reggiecustom.model.domain.Category;
 * @createDate 2022-10-02 15:09:51
 * @Entity generator.domain.Category
 */
+@Mapper
 public interface CategoryMapper extends BaseMapper<Category> {
 
 }

@@ -1,6 +1,7 @@
 package com.jack.reggiecustom.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jack.reggiecustom.common.BaseResponse;
 import com.jack.reggiecustom.model.domain.Category;
 
 /**
@@ -10,4 +11,5 @@ import com.jack.reggiecustom.model.domain.Category;
 */
 public interface CategoryService extends IService<Category> {
 
+    public BaseResponse delete(Long ids);
 }
