@@ -56,12 +56,14 @@ public class Category implements Serializable {
      * 创建人
      */
     @TableField(fill = FieldFill.INSERT) //插入时填充
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long createUser;
 
     /**
      * 修改人
      */
     @TableField(fill = FieldFill.INSERT_UPDATE) //插入和更新时填充
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long updateUser;
 
     @TableField(exist = false)
