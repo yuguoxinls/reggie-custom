@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @RestController
 @RequestMapping("/category")
@@ -62,5 +63,15 @@ public class CategoryController {
     public BaseResponse delete(Long ids){
         log.info("delete...");
         return categoryService.delete(ids);
+    }
+
+    @GetMapping("/list")
+    public BaseResponse list(int type){
+        log.info("list......");
+        List<Category> list = categoryService.list();
+        if (list == null){
+            return ResultUtils.error(ErrorCode.NULL_ERROR);
+        }
+        return ResultUtils.success(list);
     }
 }

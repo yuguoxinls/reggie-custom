@@ -7,17 +7,16 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
- * 套餐
- * @TableName setmeal
+ * 菜品口味关系表
+ * @TableName dish_flavor
  */
-@TableName(value ="setmeal")
+@TableName(value ="dish_flavor")
 @Data
-public class Setmeal implements Serializable {
+public class DishFlavor implements Serializable {
     /**
      * 主键
      */
@@ -25,39 +24,19 @@ public class Setmeal implements Serializable {
     private Long id;
 
     /**
-     * 菜品分类id
+     * 菜品
      */
-    private Long categoryId;
+    private Long dishId;
 
     /**
-     * 套餐名称
+     * 口味名称
      */
     private String name;
 
     /**
-     * 套餐价格
+     * 口味数据list
      */
-    private BigDecimal price;
-
-    /**
-     * 状态 0:停用 1:启用
-     */
-    private Integer status;
-
-    /**
-     * 编码
-     */
-    private String code;
-
-    /**
-     * 描述信息
-     */
-    private String description;
-
-    /**
-     * 图片
-     */
-    private String image;
+    private String value;
 
     /**
      * 创建时间
