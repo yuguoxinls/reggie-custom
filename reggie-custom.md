@@ -25,7 +25,7 @@
 
    对于未登录用户，要求其必须登录才能访问其他页面
 
-### 员工管理开发
+### 员工管理页面开发
 
 1. 前端发送分页查询请求 - GET：/employee/page?page=1&pageSize=10
 
@@ -109,7 +109,7 @@
    2. 修改完成后，点击保存，前端会再次发送update请求用于更新 - PUT
 
 
-### 分类管理开发
+### 分类管理页面开发
 
 1. 前端发送分页查询请求 - GET：/category/page?page=1&pageSize=10
 
@@ -196,3 +196,175 @@
    1. 根据前端传过来的分类id，去套餐表和菜品表中查找是否有套餐和菜品与之关联
    2. 有关联：返回提示，告诉用户不能删除
    3. 无关联：返回提示，可以删除
+
+### 菜品管理页面开发
+
+1. 新建菜品
+
+   1. 点击该按钮后，前端发送请求 - GET /category/list?type=1，用于获取所有的菜品分类展示到下拉菜单中
+
+      * 后端获取菜品分类信息，返回给前端
+
+   2. 新增菜品时，需要上传菜品的图片，这时涉及到文件的上传和下载操作
+
+      * 定义一个CommonController，用于管理上传和下载操作
+
+      * 在配置文件中定义文件存储路径，并在controller中引用
+
+        ```yaml
+        reggie:
+          path: F:\JAVA\项目\1 瑞吉外卖项目\upload\
+        ```
+
+        ```java
+        @Value("${reggie.path}")
+            private String basePath;
+        ```
+
+      * upload
+
+        ```java
+        @PostMapping("/upload")
+            public BaseResponse upload(MultipartFile file){
+                log.info(file.toString());
+        
+                //原始文件名
+                String originalFilename = file.getOriginalFilename();
+                String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+                //使用UUID重新生成文件名，防止文件名称重复造成文件覆盖
+                String fileName= UUID.randomUUID().toString() + suffix;
+        
+                //创建一个目录对象，以便basePath不存在时进行创建
+                File dir = new File(basePath);
+                if (!dir.exists()){
+                    //目录不存在，创建
+                    dir.mkdirs();
+                }
+        
+                try {
+                    file.transferTo(new File(basePath + fileName));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return ResultUtils.success(fileName);
+            }
+        ```
+
+      * download
+
+        ```java
+        @GetMapping("/download")
+            public void download(String name, HttpServletResponse response){
+                try {
+                    //输入流，通过输入流读取文件内容
+                    FileInputStream fileInputStream = new FileInputStream(basePath + name);
+                    //输出流，通过输出流将文件写回浏览器，在浏览器展示图片
+                    ServletOutputStream outputStream = response.getOutputStream();
+        
+                    response.setContentType("image/jpeg");
+        
+                    int len = 0;
+                    byte[] bytes = new byte[1024];
+                    while ((len = fileInputStream.read(bytes)) != -1){
+                        outputStream.write(bytes,0,len);
+                        outputStream.flush();
+                    }
+        
+                    outputStream.close();
+                    fileInputStream.close();
+        
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        ```
+
+   3. 点击保存，前端请求 - POST /dish
+
+      1. 携带数据：菜品本身信息、口味信息
+      2. 由于还携带了口味信息，单纯的dish实体类不能满足字段要求，使用DTO扩展字段
+      3. 使用dto接收信息，向数据库中存储时，由于数据是两部分组成，因此要操作两张表
+
+2. 菜品信息分页查询
+
+   1. 前端发送分页查询请求 - GET /dish/page?page=1&pageSize=10
+
+   2. 需要展示的字段
+
+      菜品名称、图片、菜品分类、售价、售卖状态、最后操作时间、操作
+
+   3. 后端开发
+
+      * 简单的按照前面分页查询固定步骤来进行查询，发现**菜品分类**字段没有相应内返回
+
+      * 这是由于dish实体类中没有菜品的分类名称，只有分类id，因此还要查询分类表
+
+      * 具体实现：
+
+        1. 创建分页构造器1，并查询分页信息，注意此时缺少**菜品分类**字段
+
+           ```java
+           Page<Dish> pageInfo = new Page<>(page, pageSize);
+                   Page<DishDto> dishDtoPage = new Page<>();
+           
+                   LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+                   queryWrapper.like(StringUtils.isNotBlank(name),Dish::getName, name);
+                   queryWrapper.orderByDesc(Dish::getUpdateTime);
+                   this.page(pageInfo, queryWrapper);
+           ```
+
+        2. 创建分页构造器2，并将创建分页构造器1的属性拷贝到2中，注意不要拷贝records属性
+
+           ```java
+           BeanUtils.copyProperties(pageInfo, dishDtoPage, "records");
+           ```
+
+        3. 针对records单独进行值的设置
+
+           ```java
+           List<Dish> records = pageInfo.getRecords();
+                   List<DishDto> list = new ArrayList<>();
+           
+                   for (Dish item : records) {
+                       DishDto dishDto = new DishDto();
+                       BeanUtils.copyProperties(item, dishDto);
+                       Long categoryId = item.getCategoryId();
+                       Category category = categoryService.getById(categoryId);
+                       if (category == null){
+                           return ResultUtils.error(ErrorCode.NULL_ERROR);
+                       }
+                       String categoryName = category.getName();
+                       dishDto.setCategoryName(categoryName);
+                       list.add(dishDto);
+                   }
+           ```
+
+        4. 将操作好的records送进创建分页构造器2中，并返回结果
+
+           ```java
+           dishDtoPage.setRecords(list);
+           return ResultUtils.success(dishDtoPage);
+           ```
+
+3. 修改菜品信息
+
+   1. 前端发送请求用于信息回显 -GET /dish/1577134630979608600
+      * 应该返回带菜品口味信息的数据，也就是dishdto
+   2. 修改后点击保存，前端发送请求 -PUT /dish
+      * 和新增菜品类似，需要操作两张表
+        * 携带数据：菜品本身信息、口味信息
+        * 由于还携带了口味信息，单纯的dish实体类不能满足字段要求，使用DTO扩展字段
+        * 使用dto接收信息，向数据库中存储时，由于数据是两部分组成，因此要操作两张表
+
+4. 删除/批量删除菜品
+
+   1. 前端发送请求 -DELETE /dish?ids=1577134630979608578，批量删除的话，ids是一个数组
+   2. 后端开发
+
+5. 启售、停售、批量启售、批量停售
+
+   1. 前端发送请求 -POST /dish/status/0?ids=1569943520653893634
+      * 0代表停售
+
+### 套餐管理页面开发
+
