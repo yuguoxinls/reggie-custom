@@ -13,4 +13,8 @@ import com.jack.reggiecustom.model.dto.DishDto;
 public interface DishService extends IService<Dish> {
 
     BaseResponse saveWithFlavor(DishDto dishDto);
+
+    BaseResponse pageWithCategory(int page, int pageSize, String name);
+
+    BaseResponse updateWithFlavor(DishDto dishDto);
 }

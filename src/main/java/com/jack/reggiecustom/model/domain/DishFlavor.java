@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -21,11 +22,13 @@ public class DishFlavor implements Serializable {
      * 主键
      */
     @TableId
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
     /**
      * 菜品
      */
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long dishId;
 
     /**
@@ -54,12 +57,14 @@ public class DishFlavor implements Serializable {
      * 创建人
      */
     @TableField(fill = FieldFill.INSERT) //插入时填充
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long createUser;
 
     /**
      * 修改人
      */
     @TableField(fill = FieldFill.INSERT_UPDATE) //插入和更新时填充
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long updateUser;
 
     /**
