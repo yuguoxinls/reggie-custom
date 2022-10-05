@@ -68,7 +68,9 @@ public class CategoryController {
     @GetMapping("/list")
     public BaseResponse list(int type){
         log.info("list......");
-        List<Category> list = categoryService.list();
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Category::getType, type);
+        List<Category> list = categoryService.list(queryWrapper);
         if (list == null){
             return ResultUtils.error(ErrorCode.NULL_ERROR);
         }

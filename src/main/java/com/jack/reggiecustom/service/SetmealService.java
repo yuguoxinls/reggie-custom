@@ -1,7 +1,9 @@
 package com.jack.reggiecustom.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jack.reggiecustom.common.BaseResponse;
 import com.jack.reggiecustom.model.domain.Setmeal;
+import com.jack.reggiecustom.model.dto.SetmealDto;
 
 /**
 * @author Administrator
@@ -10,4 +12,9 @@ import com.jack.reggiecustom.model.domain.Setmeal;
 */
 public interface SetmealService extends IService<Setmeal> {
 
+    BaseResponse saveWithDish(SetmealDto setmealDto);
+
+    BaseResponse pageWithCategory(int page, int pageSize, String name);
+
+    BaseResponse updateWithDish(SetmealDto setmealDto);
 }

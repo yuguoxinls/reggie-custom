@@ -89,4 +89,15 @@ public class DishController {
         return ResultUtils.success("操作成功！");
     }
 
+    @GetMapping("/list")
+    public BaseResponse list(@RequestParam Long categoryId){
+        log.info("categoryId......");
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Dish::getCategoryId, categoryId);
+        List<Dish> list = dishService.list(queryWrapper);
+        if (list == null){
+            return ResultUtils.error(ErrorCode.NULL_ERROR);
+        }
+        return ResultUtils.success(list);
+    }
 }
