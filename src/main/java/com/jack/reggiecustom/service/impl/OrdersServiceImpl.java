@@ -16,7 +16,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,31 +35,36 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
     private UserService userService;
 
     @Override
-    public BaseResponse pageWithUser(int page, int pageSize, String number) {
+    public BaseResponse pageWithUser(int page, int pageSize, String number, String beginTime, String endTime) {
         Page<Orders> pageInfo = new Page<>(page, pageSize);
-        Page<OrderDto> orderDtoPage = new Page<>();
 
         LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(StringUtils.isNotBlank(number),Orders::getNumber, number);
+
+        Date begin = null;
+        Date end = null;
+        if (!StringUtils.isAnyBlank(beginTime, endTime)){
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                begin = sdf.parse(beginTime);
+                end = sdf.parse(endTime);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+            queryWrapper.between(Orders::getOrderTime, begin, end);
+        }
+
         queryWrapper.orderByDesc(Orders::getCheckoutTime);
         this.page(pageInfo, queryWrapper);
-
-        BeanUtils.copyProperties(pageInfo, orderDtoPage, "records");
-
         List<Orders> records = pageInfo.getRecords();
-        List<OrderDto> list = new ArrayList<>();
-
-        for (Orders item : records) {
-            OrderDto orderDto = new OrderDto();
-            BeanUtils.copyProperties(item, orderDto);
-            Long userId = item.getUserId();
+        for (Orders record : records) {
+            Long userId = record.getUserId();
             User user = userService.getById(userId);
             String userName = user.getName();
-            orderDto.setUserName(userName);
-            list.add(orderDto);
+            record.setUserName(userName);
         }
-        orderDtoPage.setRecords(list);
-        return ResultUtils.success(orderDtoPage);
+
+        return ResultUtils.success(pageInfo);
     }
 }
 

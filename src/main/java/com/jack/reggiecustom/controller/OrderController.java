@@ -1,18 +1,15 @@
 package com.jack.reggiecustom.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jack.reggiecustom.common.BaseResponse;
+import com.jack.reggiecustom.common.ErrorCode;
 import com.jack.reggiecustom.common.ResultUtils;
 import com.jack.reggiecustom.model.domain.Orders;
-import com.jack.reggiecustom.model.dto.OrderDto;
 import com.jack.reggiecustom.service.OrdersService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 @RestController
 @RequestMapping("/order")
@@ -22,8 +19,17 @@ public class OrderController {
     private OrdersService ordersService;
 
     @GetMapping("/page")
-    public BaseResponse Page(int page, int pageSize, String number){
+    public BaseResponse Page(int page, int pageSize, String number, String beginTime, String endTime){
 
-        return ordersService.pageWithUser(page, pageSize, number); //TODO 分页查询用户信息显示不出来
+        return ordersService.pageWithUser(page, pageSize, number, beginTime, endTime);
+    }
+
+    @PutMapping
+    public BaseResponse status(@RequestBody Orders orders){
+        boolean b = ordersService.updateById(orders);
+        if (!b){
+            return ResultUtils.error(ErrorCode.SYSTEM_ERROR);
+        }
+        return ResultUtils.success("操作成功！");
     }
 }

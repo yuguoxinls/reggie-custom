@@ -51,7 +51,7 @@ public class EmployeeController {
             return ResultUtils.error(ErrorCode.NULL_ERROR);
         }
 
-        return employeeService.add(employee, request);//TODO 公共字段自动填充
+        return employeeService.add(employee, request);
     }
 
     @PostMapping("/logout")
