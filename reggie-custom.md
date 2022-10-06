@@ -4,9 +4,11 @@
 
 完成！
 
-## 员工相关后台功能开发
+## 后台管理功能开发
 
-### 登录逻辑
+### 员工相关后台功能开发
+
+#### 登录逻辑
 
 1. 前端post方式提交用户名，密码
 
@@ -25,7 +27,7 @@
 
    对于未登录用户，要求其必须登录才能访问其他页面
 
-### 员工管理页面开发
+#### 员工管理页面开发
 
 1. 前端发送分页查询请求 - GET：/employee/page?page=1&pageSize=10
 
@@ -368,3 +370,149 @@
 
 ### 套餐管理页面开发
 
+1. 添加套餐
+
+   1. 获取套餐菜品分类：前端发送请求 -GET dish/list?categoryId=1397844263642378242
+
+   2. 点击保存：前端发送请求 -POST /setmeal
+
+      1. 前端负载字段
+
+         ```json
+         {
+           "name": "商务套餐A",
+           "categoryId": "1413342269393674242",
+           "price": 18500,
+           "code": "",
+           "image": "3cc781e0-c295-400a-8932-dce7f58d713c.jpg",
+           "description": "",
+           "dishList": [],
+           "status": 1,
+           "idType": "1413342269393674242",
+           "setmealDishes": [
+             {
+               "copies": 1,
+               "dishId": "1413342036832100354",
+               "name": "北冰洋",
+               "price": 500
+             },
+             {
+               "copies": 1,
+               "dishId": "1397849739276890114",
+               "name": "辣子鸡",
+               "price": 7800
+             },
+             {
+               "copies": 1,
+               "dishId": "1413385247889891330",
+               "name": "米饭",
+               "price": 200
+             }
+           ]
+         }
+         ```
+
+      2. 现有实体类均不能满足要求，要扩展属性，使用DTO
+
+         ```java
+         public class SetmealDto extends Setmeal {
+             
+             private List<SetmealDish> setmealDishes;
+         
+             private String categoryName;
+         }
+         ```
+
+      3. 用到了两张表：setmeal和setmealDish，因此保存信息也要分开保存
+
+         **注意：向数据库插入数据时，看一下是否所有字段都有值再向里面插入，缺少的话要想办法获得值，并set之后，再插入**
+
+2. 套餐信息分页查询
+
+   1. 前端发送分页查询请求 - GET /setmeal/page?page=1&pageSize=10
+
+      1. 需要展示的字段
+
+         套餐名称、图片、套餐分类、售价、售卖状态、最后操作时间、操作
+
+   2. 后端开发
+
+      * 简单的按照前面分页查询固定步骤来进行查询，发现**套餐分类**字段没有相应内返回
+
+      * 这是由于setmeal实体类中没有菜品的分类名称，只有分类id，因此还要查询分类表
+
+      * 具体实现：
+
+        1. 创建分页构造器1，并查询分页信息，注意此时缺少**菜品分类**字段
+
+           ```java
+           Page<Setmeal> pageInfo = new Page<>(page, pageSize);
+                   Page<SetmealDto> setmealDtoPage = new Page<>();
+           
+                   LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+                   queryWrapper.like(StringUtils.isNotBlank(name),Setmeal::getName, name);
+                   queryWrapper.orderByDesc(Setmeal::getUpdateTime);
+                   this.page(pageInfo, queryWrapper);
+           ```
+
+        2. 创建分页构造器2，并将创建分页构造器1的属性拷贝到2中，注意不要拷贝records属性
+
+           ```java
+           BeanUtils.copyProperties(pageInfo, setmealDtoPage, "records");
+           ```
+
+        3. 针对records单独进行值的设置
+
+           ```java
+           List<Setmeal> records = pageInfo.getRecords();
+                   List<SetmealDto> list = new ArrayList<>();
+           
+                   for (Setmeal item : records) {
+                       SetmealDto setmealDto = new SetmealDto();
+                       BeanUtils.copyProperties(item, setmealDto);
+                       Long categoryId = item.getCategoryId();
+                       Category category = categoryService.getById(categoryId);
+                       if (category == null){
+                           return ResultUtils.error(ErrorCode.NULL_ERROR);
+                       }
+                       String categoryName = category.getName();
+                       setmealDto.setCategoryName(categoryName);
+                       list.add(setmealDto);
+                   }
+           ```
+
+        4. 将操作好的records送进创建分页构造器2中，并返回结果
+
+           ```java
+           setmealDtoPage.setRecords(list);
+           return ResultUtils.success(setmealDtoPage);
+           ```
+
+3. 修改菜品信息
+
+   1. 前端发送请求用于信息回显 -GET /setmeal/1577557552579792897
+      * 应该返回带菜品信息的数据，也就是setmealdto
+
+   2. 修改后点击保存，前端发送请求 -PUT /setmeal
+      * 和新增套餐类似，需要操作两张表
+        * 携带数据：套餐基本信息、套餐包含的菜品信息
+        * 由于还携带了菜品信息，单纯的setmeal实体类不能满足字段要求，使用DTO扩展字段
+        * 使用dto接收信息，向数据库中存储时，由于数据是两部分组成，因此要操作两张表
+
+4. 删除/批量删除套餐
+
+   1. 前端发送请求 -DELETE /setmeal?ids=1577557552579792897，批量删除的话，ids是一个数组
+
+   2. 后端开发
+
+5. 启售、停售、批量启售、批量停售
+   1. 前端发送请求 -POST /setmeal/status/0?ids=1577555878767349762,1571840441052135426
+      * 0代表停售
+
+### 订单明细页面开发
+
+1. 分页查询 -GET /order/page?page=1&pageSize=10
+
+   需要展示的字段：订单号、订单状态、用户、手机号、地址、下单时间、实收金额、操作
+
+   
