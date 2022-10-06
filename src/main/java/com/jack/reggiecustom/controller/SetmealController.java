@@ -89,4 +89,21 @@ public class SetmealController {
         }
         return ResultUtils.success("操作成功！");
     }
+
+    @GetMapping("/list")
+    public BaseResponse list(Setmeal setmeal){
+        if (setmeal == null){
+            return ResultUtils.error(ErrorCode.NULL_ERROR);
+        }
+
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Setmeal::getCategoryId, setmeal.getCategoryId());
+        queryWrapper.orderByDesc(Setmeal::getUpdateTime);
+        List<Setmeal> list = setmealService.list(queryWrapper);
+
+        if (list == null){
+            return ResultUtils.error(ErrorCode.NULL_ERROR);
+        }
+        return ResultUtils.success(list);
+    }
 }
