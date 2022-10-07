@@ -112,6 +112,36 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         return ResultUtils.success("操作成功");
 
     }
+
+    @Override
+    public BaseResponse listWithFlavors(Dish dish) {
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Dish::getCategoryId, dish.getCategoryId());
+        queryWrapper.eq(Dish::getStatus, 1);
+        queryWrapper.orderByDesc(Dish::getUpdateTime);
+        List<Dish> dishList = this.list(queryWrapper);
+
+        List<DishDto> dishDtoList = new ArrayList<>();
+        for (Dish item : dishList) {
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(item, dishDto);
+
+            LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(DishFlavor::getDishId, item.getId());
+            List<DishFlavor> dishFlavorList = dishFlavorService.list(lambdaQueryWrapper);
+            if (dishFlavorList == null){
+                return ResultUtils.error(ErrorCode.NULL_ERROR);
+            }
+            dishDto.setFlavors(dishFlavorList);
+            Long categoryId = item.getCategoryId();
+            Category category = categoryService.getById(categoryId);
+            String categoryName = category.getName();
+            dishDto.setCategoryName(categoryName);
+
+            dishDtoList.add(dishDto);
+        }
+        return ResultUtils.success(dishDtoList);
+    }
 }
 
 

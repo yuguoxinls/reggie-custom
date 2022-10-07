@@ -9,9 +9,7 @@ import com.jack.reggiecustom.model.domain.ShoppingCart;
 import com.jack.reggiecustom.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,5 +34,11 @@ public class ShoppingCartController {
         }
         return ResultUtils.success(list);
     }
+
+//    @PostMapping("/add")
+//    public BaseResponse add(@RequestBody ShoppingCart shoppingCart){
+//        Long userId = BaseContext.getCurrentId();
+////        shoppingCart.getDishId()
+//    }
 
 }

@@ -17,4 +17,6 @@ public interface DishService extends IService<Dish> {
     BaseResponse pageWithCategory(int page, int pageSize, String name);
 
     BaseResponse updateWithFlavor(DishDto dishDto);
+
+    BaseResponse listWithFlavors(Dish dish);
 }

@@ -5,6 +5,7 @@ import com.jack.reggiecustom.common.BaseContext;
 import com.jack.reggiecustom.common.ErrorCode;
 import com.jack.reggiecustom.common.ResultUtils;
 import com.jack.reggiecustom.constant.UserConstant;
+import com.jack.reggiecustom.model.domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
 
@@ -64,9 +65,9 @@ public class LoginCheckFilter implements Filter {
         }
 
         //4-2、判断移动端登陆状态，如果已经登陆，则直接放行
-        if (request.getSession().getAttribute("user") != null){ //TODO 这个地方的“user”要改
-            Long userId = (Long) request.getSession().getAttribute("user");
-            BaseContext.setCurrentId(userId);
+        if (request.getSession().getAttribute("user") != null){
+            User user = (User) request.getSession().getAttribute("user");
+            BaseContext.setCurrentId(user.getId());
 
             filterChain.doFilter(request, response);
             return;
