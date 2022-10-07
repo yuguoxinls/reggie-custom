@@ -28,7 +28,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         Long dishId = shoppingCart.getDishId();
 
         ShoppingCart cartServiceOne = new ShoppingCart();
-        addShoppingCart(dishId, cartServiceOne, this, shoppingCart);
+        addShoppingCart(dishId, cartServiceOne, this, shoppingCart, userId);
 //        if (dishId == null){
 //            addShoppingCart(dishId, cartServiceOne, this, shoppingCart);
 //        }else {
@@ -37,8 +37,20 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         return ResultUtils.success(cartServiceOne);
     }
 
-    private void addShoppingCart(Long id, ShoppingCart cartServiceOne, ShoppingCartService shoppingCartService, ShoppingCart shoppingCart){
+    @Override
+    public BaseResponse sub(ShoppingCart shoppingCart) {
+        Long userId = BaseContext.getCurrentId();
+        shoppingCart.setUserId(userId);
+        Long dishId = shoppingCart.getDishId();
+
+        ShoppingCart cartServiceOne = new ShoppingCart();
+        subShoppingCart(dishId, cartServiceOne, this, shoppingCart, userId);
+        return ResultUtils.success(cartServiceOne);
+    }
+
+    private void addShoppingCart(Long id, ShoppingCart cartServiceOne, ShoppingCartService shoppingCartService, ShoppingCart shoppingCart, Long userId){
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ShoppingCart::getUserId, userId);
         if (id == null){
             id = shoppingCart.getSetmealId();
             queryWrapper.eq(ShoppingCart::getSetmealId, id);
@@ -57,6 +69,27 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
             //购物车中已经有了
             cartServiceOne.setNumber(cartServiceOne.getNumber() + 1);
             shoppingCartService.updateById(cartServiceOne);
+        }
+    }
+
+    private void subShoppingCart(Long id, ShoppingCart cartServiceOne, ShoppingCartService shoppingCartService, ShoppingCart shoppingCart, Long userId){
+        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ShoppingCart::getUserId, userId);
+        if (id == null){
+            id = shoppingCart.getSetmealId();
+            queryWrapper.eq(ShoppingCart::getSetmealId, id);
+        }else {
+            queryWrapper.eq(ShoppingCart::getDishId, id);
+        }
+
+        cartServiceOne = shoppingCartService.getOne(queryWrapper);
+        Integer number = cartServiceOne.getNumber();
+        assert number >= 1;
+        if (number > 1){
+            cartServiceOne.setNumber(number - 1);
+            shoppingCartService.updateById(cartServiceOne);
+        }else {
+            shoppingCartService.removeById(cartServiceOne.getId());
         }
     }
 }

@@ -43,4 +43,9 @@ public class ShoppingCartController {
 
     }
 
+    @PostMapping("/sub")
+    public BaseResponse sub(@RequestBody ShoppingCart shoppingCart){
+        return shoppingCartService.sub(shoppingCart);
+    }
+
 }

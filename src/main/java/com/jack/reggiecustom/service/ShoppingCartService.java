@@ -12,4 +12,6 @@ import com.jack.reggiecustom.model.domain.ShoppingCart;
 public interface ShoppingCartService extends IService<ShoppingCart> {
 
     BaseResponse add(ShoppingCart shoppingCart);
+
+    BaseResponse sub(ShoppingCart shoppingCart);
 }
