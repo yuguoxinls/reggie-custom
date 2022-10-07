@@ -9,6 +9,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -71,8 +72,7 @@ public class ShoppingCart implements Serializable {
     /**
      * 创建时间
      */
-    @TableField(fill = FieldFill.INSERT) //指定什么时候填充字段：插入时填充
-    private Date createTime;
+    private LocalDateTime createTime;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

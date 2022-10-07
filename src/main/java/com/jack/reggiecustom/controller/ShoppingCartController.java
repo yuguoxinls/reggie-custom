@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -35,10 +36,11 @@ public class ShoppingCartController {
         return ResultUtils.success(list);
     }
 
-//    @PostMapping("/add")
-//    public BaseResponse add(@RequestBody ShoppingCart shoppingCart){
-//        Long userId = BaseContext.getCurrentId();
-////        shoppingCart.getDishId()
-//    }
+    @PostMapping("/add")
+    public BaseResponse add(@RequestBody ShoppingCart shoppingCart){
+
+        return shoppingCartService.add(shoppingCart);
+
+    }
 
 }

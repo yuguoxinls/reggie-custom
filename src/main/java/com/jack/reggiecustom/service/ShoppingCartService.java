@@ -1,6 +1,7 @@
 package com.jack.reggiecustom.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jack.reggiecustom.common.BaseResponse;
 import com.jack.reggiecustom.model.domain.ShoppingCart;
 
 /**
@@ -10,4 +11,5 @@ import com.jack.reggiecustom.model.domain.ShoppingCart;
 */
 public interface ShoppingCartService extends IService<ShoppingCart> {
 
+    BaseResponse add(ShoppingCart shoppingCart);
 }
