@@ -1,5 +1,6 @@
 package com.jack.reggiecustom.model.domain;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -7,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -92,22 +94,26 @@ public class AddressBook implements Serializable {
     /**
      * 创建时间
      */
-    private Date createTime;
+    @TableField(fill = FieldFill.INSERT) //指定什么时候填充字段：插入时填充
+    private LocalDateTime createTime;
 
     /**
      * 更新时间
      */
-    private Date updateTime;
+    @TableField(fill = FieldFill.INSERT_UPDATE) //插入和更新时填充
+    private LocalDateTime updateTime;
 
     /**
      * 创建人
      */
+    @TableField(fill = FieldFill.INSERT) //插入时填充
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long createUser;
 
     /**
      * 修改人
      */
+    @TableField(fill = FieldFill.INSERT_UPDATE) //插入和更新时填充
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long updateUser;
 
