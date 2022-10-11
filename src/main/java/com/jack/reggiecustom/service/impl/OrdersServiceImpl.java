@@ -10,10 +10,8 @@ import com.jack.reggiecustom.common.ErrorCode;
 import com.jack.reggiecustom.common.ResultUtils;
 import com.jack.reggiecustom.mapper.OrdersMapper;
 import com.jack.reggiecustom.model.domain.*;
-import com.jack.reggiecustom.model.dto.OrderDto;
 import com.jack.reggiecustom.service.*;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
