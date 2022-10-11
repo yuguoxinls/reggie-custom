@@ -32,4 +32,9 @@ public class OrderController {
         }
         return ResultUtils.success("操作成功！");
     }
+
+    @PostMapping("/submit")
+    public BaseResponse submit(@RequestBody Orders orders){
+        return ordersService.submit(orders);
+    }
 }
