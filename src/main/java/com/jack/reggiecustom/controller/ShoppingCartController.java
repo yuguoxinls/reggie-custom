@@ -48,4 +48,13 @@ public class ShoppingCartController {
         return shoppingCartService.sub(shoppingCart);
     }
 
+    @DeleteMapping("/clean")
+    public BaseResponse clean(){
+        Long userId = BaseContext.getCurrentId();
+        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ShoppingCart::getUserId, userId);
+        shoppingCartService.remove(queryWrapper);
+        return ResultUtils.success("清空购物车成功！");
+    }
+
 }

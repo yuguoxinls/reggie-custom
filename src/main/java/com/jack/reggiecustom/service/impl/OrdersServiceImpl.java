@@ -10,8 +10,10 @@ import com.jack.reggiecustom.common.ErrorCode;
 import com.jack.reggiecustom.common.ResultUtils;
 import com.jack.reggiecustom.mapper.OrdersMapper;
 import com.jack.reggiecustom.model.domain.*;
+import com.jack.reggiecustom.model.dto.OrderDto;
 import com.jack.reggiecustom.service.*;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -130,6 +132,59 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
         orderDetailService.saveBatch(orderDetails);
         shoppingCartService.remove(queryWrapper);
         return ResultUtils.success("下单成功！");
+    }
+
+    @Override
+    public BaseResponse pageWithOrderDetail(int page, int pageSize) {
+        Page<Orders> pageInfo = new Page<>(page, pageSize);
+        Page<OrderDto> dtoPage = new Page<>();
+
+        BeanUtils.copyProperties(pageInfo, dtoPage, "records");
+
+        Long userId = BaseContext.getCurrentId();
+        LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Orders::getUserId, userId);
+        queryWrapper.orderByDesc(Orders::getCheckoutTime);
+        List<Orders> orders = this.list(queryWrapper);
+
+        List<OrderDto> orderDtos = new ArrayList<>();
+        for (Orders order : orders) {
+            OrderDto orderDto = new OrderDto();
+            BeanUtils.copyProperties(order, orderDto);
+
+            LambdaQueryWrapper<OrderDetail> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(OrderDetail::getOrderId, order.getId());
+            List<OrderDetail> orderDetails = orderDetailService.list(lambdaQueryWrapper);
+            orderDto.setOrderDetails(orderDetails);
+            orderDtos.add(orderDto);
+        }
+        dtoPage.setRecords(orderDtos);
+        return ResultUtils.success(dtoPage);
+    }
+
+    @Override
+    public BaseResponse again(Orders orders) {
+        Long orderId = orders.getId();
+        LambdaQueryWrapper<OrderDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderDetail::getOrderId, orderId);
+        List<OrderDetail> orderDetails = orderDetailService.list(queryWrapper);
+
+
+        Long userId = BaseContext.getCurrentId();
+        for (OrderDetail orderDetail : orderDetails) {
+            ShoppingCart shoppingCart = new ShoppingCart();
+            shoppingCart.setName(orderDetail.getName());
+            shoppingCart.setImage(orderDetail.getImage());
+            shoppingCart.setUserId(userId);
+            shoppingCart.setDishId(orderDetail.getDishId());
+            shoppingCart.setSetmealId(orderDetail.getSetmealId());
+            shoppingCart.setDishFlavor(orderDetail.getDishFlavor());
+            shoppingCart.setNumber(orderDetail.getNumber());
+            shoppingCart.setAmount(orderDetail.getAmount());
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            shoppingCartService.save(shoppingCart);
+        }
+        return ResultUtils.success("订单信息再现成功！");
     }
 }
 

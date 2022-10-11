@@ -17,4 +17,9 @@ public interface OrdersService extends IService<Orders> {
     BaseResponse pageWithUser(int page, int pageSize, String number, String beginTime, String endTime);
 
     BaseResponse submit(Orders orders);
+
+    BaseResponse pageWithOrderDetail(int page, int pageSize);
+
+    BaseResponse again(Orders orders);
+
 }
