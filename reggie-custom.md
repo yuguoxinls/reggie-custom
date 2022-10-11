@@ -636,4 +636,110 @@
       1. 如果购物车中只有一个，则直接从数据库中删除
       2. 超过一个，将number减一后返回
 
+4. 清空购物车 - DELETE /shoppingCart/clean
+
+   直接调用service删除该userId下的购物车数据
+
 ### 结算功能开发
+
+#### 地址相关功能
+
+1. 配送地址信息展示
+
+   点击结算按钮，页面跳转后发送请求 -GET /addressBook/default 用于用户地址展示
+
+2. 新增收货地址 - POST /addressBook 
+
+   携带JSON数据
+
+   ```json
+   {
+     "consignee": "Jack Yu",
+     "phone": "13302097798",
+     "sex": "1",
+     "detail": "School of Information and Electronics, Beijing Institute of Technology, Beijing 100081, China",
+     "label": "公司"
+   }
+   ```
+
+3. 修改地址
+
+   1. 根据当前id查询地址，用于信息回显 发请求 - GET /addressBook/1579393827818180609
+
+   2. 修改信息后点击保存，发请求 -PUT /addressBook
+
+      携带JSON数据
+
+      ```json
+      {
+        "id": "1579393827818180609",
+        "userId": "1571681325604163586",
+        "consignee": "Jack Yu",
+        "sex": "1",
+        "phone": "13821577412",
+        "provinceCode": null,
+        "provinceName": null,
+        "cityCode": null,
+        "cityName": null,
+        "districtCode": null,
+        "districtName": null,
+        "detail": "School of Information and Electronics, Beijing Institute of Technology, Beijing 100081, China",
+        "label": "家",
+        "isDefault": 1,
+        "createTime": "2022-10-10T16:50:07",
+        "updateTime": "2022-10-10T19:14:53",
+        "createUser": "1571681325604163586",
+        "updateUser": "1571681325604163586",
+        "isDeleted": 0
+      }
+      ```
+
+4. 删除地址 -DELETE /addressBook?ids=1579393827818180609
+
+#### 支付功能
+
+点击去支付，前端发送请求 -POST /order/submit
+
+携带JSON数据
+
+```json
+{
+  "remark": "",
+  "payMethod": 1,
+  "addressBookId": "1579433755272822785"
+}
+```
+
+后端步骤：
+
+1. 判断当前用户购物车内是否有商品
+2. 判断当前用户地址信息是否有效
+3. 向订单明细表插入数据  **3和4两步不能颠倒顺序，3中插入数据的同时会计算商品总金额，4中会用到**
+4. 向订单表插入数据
+5. 下单成功后，清空购物车
+
+### 查看订单功能
+
+用户下单成功后，点击查看订单按钮，发请求 -GET /order/userPage?page=1&pageSize=5
+
+分页查询：
+
+1. 根据userId获得所有的orderId
+2. 针对每一个orderId，查询orderDetail表，返回分页数据
+   * 这里在构造分页构造器的时候，遇到障碍，泛型该如何选择？不能简单返回一个order，因为还需要菜品的详细信息。这时可以使用Dto对象，在order对象的基础上，扩展菜品的详细信息属性
+
+### 再来一单功能
+
+用户在订单列表，点击“已完成”状态下订单的“再来一单”按钮，发请求 -POST /order/again
+
+携带json数据，根据orderId，查询用户所点的商品，返回
+
+```json
+{
+  "id": "1571686226988126210"
+}
+```
+
+### 退出功能
+
+清楚session中的数据 - POST /user/loginout
