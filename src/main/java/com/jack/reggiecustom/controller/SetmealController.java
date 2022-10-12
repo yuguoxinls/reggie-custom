@@ -15,9 +15,11 @@ import com.jack.reggiecustom.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/setmeal")
@@ -28,6 +30,8 @@ public class SetmealController {
     private SetmealService setmealService;
     @Autowired
     private SetmealDishService setmealDishService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @PostMapping
     public BaseResponse save(@RequestBody SetmealDto setmealDto){
@@ -96,14 +100,26 @@ public class SetmealController {
             return ResultUtils.error(ErrorCode.NULL_ERROR);
         }
 
+        List<Setmeal> list;
+        //动态的构造key，因为是按照分类来查询redis中的菜品，分类不同，key也不同
+        String key = "setmeal_" + setmeal.getCategoryId() + "_" + setmeal.getStatus();
+        //根据key从redis中查询
+        list = (List<Setmeal>) redisTemplate.opsForValue().get(key);
+
+        if (list != null){
+            //不为空说明查到了，也就是redis中存了菜品，直接返回即可
+            return ResultUtils.success(list);
+        }
+
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Setmeal::getCategoryId, setmeal.getCategoryId());
         queryWrapper.orderByDesc(Setmeal::getUpdateTime);
-        List<Setmeal> list = setmealService.list(queryWrapper);
+        list = setmealService.list(queryWrapper);
 
         if (list == null){
             return ResultUtils.error(ErrorCode.NULL_ERROR);
         }
+        redisTemplate.opsForValue().set(key, list, 60, TimeUnit.MINUTES);
         return ResultUtils.success(list);
     }
 }

@@ -18,10 +18,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
 * @author Administrator
@@ -37,6 +39,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     @Lazy
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public BaseResponse saveWithFlavor(DishDto dishDto) {
@@ -115,13 +119,25 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
 
     @Override
     public BaseResponse listWithFlavors(Dish dish) {
+        List<DishDto> dishDtoList; // 最终要返回的对象
+
+        //动态的构造key，因为是按照分类来查询redis中的菜品，分类不同，key也不同
+        String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();
+        //根据key从redis中查询
+        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
+
+        if (dishDtoList != null){
+            //不为空说明查到了，也就是redis中存了菜品，直接返回即可
+            return ResultUtils.success(dishDtoList);
+        }
+        //执行到这说明redis中没有，先查数据库，再存到redis
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Dish::getCategoryId, dish.getCategoryId());
         queryWrapper.eq(Dish::getStatus, 1);
         queryWrapper.orderByDesc(Dish::getUpdateTime);
         List<Dish> dishList = this.list(queryWrapper);
 
-        List<DishDto> dishDtoList = new ArrayList<>();
+        dishDtoList = new ArrayList<>();
         for (Dish item : dishList) {
             DishDto dishDto = new DishDto();
             BeanUtils.copyProperties(item, dishDto);
@@ -140,6 +156,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
 
             dishDtoList.add(dishDto);
         }
+        redisTemplate.opsForValue().set(key, dishDtoList, 60, TimeUnit.MINUTES);
         return ResultUtils.success(dishDtoList);
     }
 }
