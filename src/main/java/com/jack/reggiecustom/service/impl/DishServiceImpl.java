@@ -58,6 +58,14 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         if (!b){
             return ResultUtils.error(ErrorCode.SYSTEM_ERROR);
         }
+        //清理菜品缓存数据，两种方式
+        //方式一：清理所有菜品的缓存数据
+//        Set keys = redisTemplate.keys("dish_*");
+//        redisTemplate.delete(keys);
+
+        //方式二：清理某个分类下的菜品缓存
+        String key = "dish_" + dishDto.getCategoryId() + "_" + dishDto.getStatus();
+        redisTemplate.delete(key);
         return ResultUtils.success("操作成功");
     }
 
@@ -113,6 +121,14 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         if (!b){
             return ResultUtils.error(ErrorCode.SYSTEM_ERROR);
         }
+        //清理菜品缓存数据，两种方式
+        //方式一：清理所有菜品的缓存数据
+//        Set keys = redisTemplate.keys("dish_*");
+//        redisTemplate.delete(keys);
+
+        //方式二：清理某个分类下的菜品缓存
+        String key = "dish_" + dishDto.getCategoryId() + "_" + dishDto.getStatus();
+        redisTemplate.delete(key);
         return ResultUtils.success("操作成功");
 
     }

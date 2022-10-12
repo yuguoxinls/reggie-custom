@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
     @Lazy
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private RedisTemplate redisTemplate;
     @Override
     public BaseResponse saveWithDish(SetmealDto setmealDto) {
         //1. 保存套餐基本信息
@@ -50,6 +53,14 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
             setmealDish.setSetmealId(setmealDto.getId().toString());
         }
         setmealDishService.saveBatch(setmealDishes);
+        //清理菜品缓存数据，两种方式
+        //方式一：清理所有菜品的缓存数据
+//        Set keys = redisTemplate.keys("dish_*");
+//        redisTemplate.delete(keys);
+
+        //方式二：清理某个分类下的菜品缓存
+        String key = "setmeal_" + setmealDto.getCategoryId() + "_" + setmealDto.getStatus();
+        redisTemplate.delete(key);
         return ResultUtils.success("操作成功！");
     }
 
@@ -103,6 +114,14 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
             setmealDish.setSetmealId(setmealId.toString());
         }
         setmealDishService.saveBatch(setmealDishes);
+        //清理菜品缓存数据，两种方式
+        //方式一：清理所有菜品的缓存数据
+//        Set keys = redisTemplate.keys("dish_*");
+//        redisTemplate.delete(keys);
+
+        //方式二：清理某个分类下的菜品缓存
+        String key = "setmeal_" + setmealDto.getCategoryId() + "_" + setmealDto.getStatus();
+        redisTemplate.delete(key);
 
         return ResultUtils.success("操作成功！");
     }
