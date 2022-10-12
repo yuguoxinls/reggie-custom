@@ -11,10 +11,13 @@ import com.jack.reggiecustom.service.UserService;
 import com.jack.reggiecustom.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
 * @author Administrator
@@ -25,6 +28,8 @@ import java.util.Map;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     implements UserService {
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public BaseResponse sendMsg(User user, HttpServletRequest request) {
@@ -35,7 +40,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         String validCode = ValidateCodeUtils.generateValidateCode(4).toString(); //生成四位验证码
-        request.getSession().setAttribute("code", validCode); //将验证码存到session中以便后续校验
+//        request.getSession().setAttribute("code", validCode); //将验证码存到session中以便后续校验
+        redisTemplate.opsForValue().set("code", validCode, 5, TimeUnit.MINUTES); // 将验证码保存到redis，并设置有效期为5分钟
 
         log.info("验证码："+validCode); //这里应该是发送验证码逻辑
 
@@ -52,7 +58,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return ResultUtils.error(ErrorCode.NULL_ERROR);
         }
 
-        String codeInSession = (String) request.getSession().getAttribute("code");
+//        String codeInSession = (String) request.getSession().getAttribute("code");
+        String codeInSession = (String) redisTemplate.opsForValue().get("code"); // 获得redis中缓存的验证码
         if (!codeInSession.equals(code)){
             return ResultUtils.error(ErrorCode.PARAMS_ERROR, "验证码错误！");
         }
@@ -66,6 +73,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             user.setPhone(phone);
             this.save(user);
         }
+        redisTemplate.delete("code"); // 用户登陆成功则删除redis中的验证码
         request.getSession().setAttribute("user", user);
         return ResultUtils.success("登录成功！");
     }
