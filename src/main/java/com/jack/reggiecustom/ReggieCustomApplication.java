@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @ServletComponentScan
 //@EnableTransactionManagement
-//@EnableCaching
+@EnableCaching // 开启spring cache
 @EnableScheduling
 @Slf4j
 public class ReggieCustomApplication {
