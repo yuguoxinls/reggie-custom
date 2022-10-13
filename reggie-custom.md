@@ -743,3 +743,84 @@
 ### 退出功能
 
 清楚session中的数据 - POST /user/loginout
+
+## 项目优化 (Redis, Mysql主从复制, Nginx, Swagger)
+
+### 使用Redis缓存技术的前期准备（主要是使用Redis Template对象）
+
+1. 添加redis依赖
+
+   ```xml
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-data-redis</artifactId>
+   </dependency>
+   ```
+
+2. 配置文件
+
+   ```yaml
+   spring:
+     redis:
+       host: localhost
+       port: 6379
+       database: 0
+   ```
+
+3. 添加配置类，主要是为了修改redis template的key的序列化方式
+
+   ```java
+   @Configuration
+   public class RedisConfig extends CachingConfigurerSupport {
+   
+       @Bean
+       public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+           RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
+   
+           //默认的Key序列化器为：JdkSerializationRedisSerializer
+           redisTemplate.setKeySerializer(new StringRedisSerializer()); // key序列化
+           //redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer()); // value序列化
+   
+           redisTemplate.setConnectionFactory(connectionFactory);
+           return redisTemplate;
+       }
+   }
+   ```
+
+### 缓存短信验证码
+
+之前的验证码存到了session中，这里改为使用redis缓存，并设置到期时间
+
+1. 注入redis template对象
+
+   ```java
+   @Autowired
+   private RedisTemplate redisTemplate;
+   ```
+
+2. 存入redis
+
+   ```java
+   redisTemplate.opsForValue().set("code", validCode, 5, TimeUnit.MINUTES); // 将验证码保存到redis，并设置有效期为5分钟
+   ```
+
+3. 登录时从redis中获取
+
+   ```java
+   String codeInSession = (String) redisTemplate.opsForValue().get("code"); // 获得redis中缓存的验证码
+   ```
+
+4. 登录成功后删除redis中的验证码
+
+   ```java
+   redisTemplate.delete("code"); // 用户登陆成功则删除redis中的验证码
+   ```
+
+### 缓存菜品/套餐数据
+
+查询菜品/套餐的时候，先访问redis，有的话就直接返回；没有的话，查数据库，并存到redis
+
+**注意：**还需要改造save和update方法，保证数据库和redis中数据的一致性。在执行save和update操作后，删除redis中的数据即可
+
+
+
