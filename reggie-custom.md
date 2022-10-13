@@ -822,5 +822,46 @@
 
 **注意：**还需要改造save和update方法，保证数据库和redis中数据的一致性。在执行save和update操作后，删除redis中的数据即可
 
+### 使用spring cache缓存套餐数据
+
+1. 导入pom文件依赖
+2. 在配置文件中配置数据过期时间
+3. 启动类上使用@EnableCaching开启缓存支持
+4. 在setmealcontroller的list方法上添加@Cacheable注解
+5. 在save和delete方法上添加@CacheEvict注解
+
+## 使用Spring Cache简化redis代码量的书写
+
+1. 介绍
+
+   * Spring Cache是一个框架，实现了基于注解的缓存功能，只需要简单地加一个注解，就能实现缓存功能。
+
+   * Spring Cache提供了一层抽象，底层可以切换不同的cache实现。具体就是通过CacheManager接口来统一不同的缓存技术。
+
+   * CacheManager是spring提供的各种缓存技术抽象接口，针对不同的缓存技术需要实现不同的CacheManager：
+
+     <img src="https://img-blog.csdnimg.cn/8c763a041ae34aaea4104fbc34ae949c.png" style="zoom:150%;" />
+
+2. 常用注解
+
+   ```java
+   @EnableCaching    // 开启SpringCache注解方式的缓存功能，一般放在启动类上
+   @Cacheable   //在方法执行前spring先查看缓存中是否有数据，如果有数据，则直接返回缓存数据；若没有数据，调用方法并将方法返回值放到缓存中，一般放在方法上
+   @CachePut  //将方法的返回值放到缓存中，一般放在方法上
+   @CacheEvict  //将一条或多条数据从缓存中删除
+   ```
+
+   在spring boot项目中 ，使用缓存技术只需在项目中导入相关缓存技术的依赖包，并在启动类上使用@EnableCaching开启缓存支持即可。
+
+
+
+
+
+
+
+
+
+
+
 
 
